@@ -91,6 +91,7 @@
   overflow: hidden;
   opacity: 0;
   transition: opacity 3s ease-in-out 2s;
+  box-shadow: 0 0px 15px 17px rgb(0 0 0 / 32%);
 }
 
 #previousCover {
