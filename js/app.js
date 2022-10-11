@@ -1,3 +1,12 @@
+// Todo Mark:
+// Better quality images from coverartarchive api via Musicbrainz id pi
+//
+// 1. Get MBID from musicbrainz api based on param search (Apache Lucene)
+// https://musicbrainz.org/ws/2/release/?query=artist:%22Sleep%20Token%22%20AND%20release:%22This%20Place%20Will%20Become%20Your%20Tomb%22&fmt=json
+// 
+// 2. Hit  overartarchive with that MBID to get the high quality art
+// https://coverartarchive.org/release/833d6e56-e2ca-4c2c-8612-5930d9cd0490
+
 // login
 // get current album cover
 //    if none display spotify logo
@@ -123,17 +132,38 @@ function main() {
 
             // if changing to new cover
             if (holdAlbumImg != playing.albumImg) {
+              var mbid;
+              var artworkHq;
+              var mbidQuery = "https://musicbrainz.org/ws/2/release/?query=artist:\"" + playing.artist + "\"20AND%20release:\"" + playing.album + "\"&fmt=json";
+              var mbidQueryJson = $.ajax({
+                dataType: "json",
+                url: mbidQuery,
+                success: function(data) {
+                  mbid = data.releases[0].id
+                }
+              })
+              $.when(mbidQueryJson).done(function(){
+                var archiveArt = $.ajax({
+                  dataType: "json",
+                  url: "https://coverartarchive.org/release/" + mbid,
+                  success: function(data){
+                    artworkHq = data.images[0].image;
+                  }
+                })
+                $.when(archiveArt).done(function(){
+                  playing.albumImg = artworkHq;
+                  // if there was a previous cover
+                  if (holdAlbumImg) {
+                    $('#previousCover').css("background-image", "url('" + holdAlbumImg + "')");
+                  }
 
-              // if there was a previous cover
-              if (holdAlbumImg) {
-                $('#previousCover').css("background-image", "url('" + holdAlbumImg + "')");
-              }
-
-              $('#cover').css("background-image", "url('" + playing.albumImg + "')");
-              $('#track').html('<a href=' + playing.trackURL + ' target="_blank">' + playing.track + '</a>');
-              $('#artist').html('<a href=' + playing.artistURL + ' target="_blank">' + playing.artist + '</a>');
-              $('#album').html('<a href=' + playing.albumURL + ' target="_blank">' + playing.album + '</a>');
-              holdAlbumImg = playing.albumImg;
+                  $('#cover').css("background-image", "url('" + playing.albumImg + "')");
+                  $('#track').html('<a href=' + playing.trackURL + ' target="_blank">' + playing.track + '</a>');
+                  $('#artist').html('<a href=' + playing.artistURL + ' target="_blank">' + playing.artist + '</a>');
+                  $('#album').html('<a href=' + playing.albumURL + ' target="_blank">' + playing.album + '</a>');
+                  holdAlbumImg = playing.albumImg;
+                })
+              })
             }
           }
           refresh = setTimeout(refreshCurrentAlbum, 250);
