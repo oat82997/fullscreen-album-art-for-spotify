@@ -130,28 +130,45 @@ function main() {
               trackURL: response.item.external_urls.spotify
             };
 
+            function logImages() {
+              console.log("hold: " + holdAlbumImg)
+              console.log("playing: " + playing.holdAlbumImg)
+            }
+
+            //logImages();
+
             // if changing to new cover
             if (holdAlbumImg != playing.albumImg) {
               var mbid;
               var artworkHq;
+              var mbidError;
               var mbidQuery = "https://musicbrainz.org/ws/2/release/?query=artist:\"" + playing.artist + "\"20AND%20release:\"" + playing.album + "\"&fmt=json";
               var mbidQueryJson = $.ajax({
                 dataType: "json",
                 url: mbidQuery,
                 success: function(data) {
-                  mbid = data.releases[0].id
+                  mbid = data.releases[0].id;
                 }
               })
               $.when(mbidQueryJson).done(function(){
                 var archiveArt = $.ajax({
                   dataType: "json",
                   url: "https://coverartarchive.org/release/" + mbid,
-                  success: function(data){
+                  success: function(data) {
                     artworkHq = data.images[0].image;
+                    playing.albumImg = artworkHq;
+                    changeCover();
+                    console.log("success arthq: " + artworkHq)
+                  },
+                  statusCode: {
+                    404: function(data){
+                      artworkHq = playing.albumImg;
+                      changeCover();
+                    }
                   }
                 })
-                $.when(archiveArt).done(function(){
-                  playing.albumImg = artworkHq;
+
+                function changeCover() {
                   // if there was a previous cover
                   if (holdAlbumImg) {
                     $('#previousCover').css("background-image", "url('" + holdAlbumImg + "')");
@@ -162,11 +179,11 @@ function main() {
                   $('#artist').html('<a href=' + playing.artistURL + ' target="_blank">' + playing.artist + '</a>');
                   $('#album').html('<a href=' + playing.albumURL + ' target="_blank">' + playing.album + '</a>');
                   holdAlbumImg = playing.albumImg;
-                })
+                }
               })
             }
           }
-          refresh = setTimeout(refreshCurrentAlbum, 250);
+          refresh = setTimeout(refreshCurrentAlbum, 2500);
         },
         error: function(response) {
           if (response.status == 401) {
