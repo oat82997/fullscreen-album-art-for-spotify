@@ -1,12 +1,3 @@
-@font-face {
-  font-family: 'gilroy';
-  src: url('https://gist.github.com/mfd/09b70eb47474836f25a21660282ce0fd/raw/2923dc0cccd912c217ef244f5c42d547deab5b60/Gilroy-Bold.woff') format('woff');
-}
-
-* {
-  font-family: 'gilroy';
-}
-
 #login {
   margin: auto;
   background-color: white;
