@@ -1,4 +1,7 @@
-body { font: 'Gilroy', 900, normal; }
+body {
+  font-family: 'Gilroy';
+  font-weight: 900;
+}
 
 #login {
   margin: auto;
